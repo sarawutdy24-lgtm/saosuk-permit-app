@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ติดตามสถานะคำขอ - อบต.เชิงทะเล</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 font-sans min-h-screen">
+    <nav class="bg-blue-900 text-white shadow-lg p-4">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <h1 class="font-bold text-lg md:text-xl">อบต.เชิงทะเล | ติดตามสถานะคำขอ</h1>
+            <a href="index.html" class="bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-lg text-sm transition">ยื่นคำขอใหม่</a>
+        </div>
+    </nav>
+
+    <div class="max-w-2xl mx-auto my-8 p-6 bg-white rounded-xl shadow-md">
+        <h2 class="text-xl font-bold text-slate-800 mb-4">ค้นหาและตรวจสอบสถานะคำขอ</h2>
+        
+        <div class="flex gap-2 mb-6">
+            <input type="text" id="searchInput" placeholder="พิมพ์เลขที่คำขอ (เช่น REQ-2569-1001) หรือ เบอร์โทรศัพท์" class="flex-1 p-2.5 border rounded-lg">
+            <button onclick="searchStatus()" class="bg-blue-700 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-800">ค้นหา</button>
+        </div>
+
+        <div id="resultBox" class="hidden space-y-4"></div>
+    </div>
+
+    <script>
+        // โหลดเลขที่คำขออัตโนมัติหากมาจาก URL query string
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const appNo = urlParams.get('app_no');
+            if (appNo) {
+                document.getElementById('searchInput').value = appNo;
+                searchStatus();
+            }
+        };
+
+        async function searchStatus() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) return alert('กรุณากรอกข้อมูลค้นหา');
+
+            const resultBox = document.getElementById('resultBox');
+            resultBox.innerHTML = '<p class="text-center text-gray-500">กำลังค้นหาข้อมูล...</p>';
+            resultBox.classList.remove('hidden');
+
+            try {
+                const res = await fetch(`/api/tracking?q=${encodeURIComponent(keyword)}`);
+                const data = await res.json();
+
+                if (data.success && data.results.length > 0) {
+                    resultBox.innerHTML = data.results.map(item => `
+                        <div class="border rounded-lg p-4 bg-slate-50 space-y-2">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="text-xs font-semibold px-2.5 py-1 rounded ${item.app_type === 'NEW' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}">
+                                        ${item.app_type === 'NEW' ? 'ขอใหม่' : 'ต่ออายุ'}
+                                    </span>
+                                    <h3 class="font-bold text-lg text-slate-800 mt-1">${item.app_no}</h3>
+                                </div>
+                                <div>${getStatusBadge(item.status)}</div>
+                            </div>
+                            <p class="text-sm text-gray-700"><b>ชื่อผู้ยื่น:</b> ${item.applicant_name}</p>
+                            <p class="text-sm text-gray-700"><b>ร้านค้า:</b> ${item.business_name} (${item.business_type})</p>
+                            <p class="text-sm text-gray-500"><b>วันที่ยื่น:</b> ${new Date(item.created_at).toLocaleString('th-TH')}</p>
+                            ${item.officer_remark ? `<div class="bg-amber-50 p-2.5 rounded border border-amber-200 text-xs text-amber-900"><b>หมายเหตุจากเจ้าหน้าที่:</b> ${item.officer_remark}</div>` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    resultBox.innerHTML = '<p class="text-center text-red-500 py-4">ไม่พบข้อมูลคำขอในระบบ</p>';
+                }
+            } catch (err) {
+                resultBox.innerHTML = '<p class="text-center text-red-500 py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>';
+            }
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'PENDING': '<span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">รอตรวจสอบ</span>',
+                'APPROVED': '<span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">อนุมัติแล้ว</span>',
+                'REJECTED': '<span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full">ไม่อนุมัติ</span>',
+                'ACTION_REQUIRED': '<span class="bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1 rounded-full">ต้องแก้ไขเอกสาร</span>'
+            };
+            return badges[status] || status;
+        }
+    </script>
+</body>
+</html>

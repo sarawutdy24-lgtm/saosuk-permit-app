@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใบอนุญาตประกอบกิจการ - อบต.เชิงทะเล</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            body { background: #fff; padding: 0; }
+            .no-print { display: none !important; }
+            .print-area { border: none !important; shadow: none !important; padding: 0 !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-200 font-sans p-4 md:p-8">
+
+    <!-- ปุ่มควบคุมฝั่งเจ้าหน้าที่ (ซ่อนเมื่อกดพิมพ์) -->
+    <div class="no-print max-w-4xl mx-auto mb-4 flex justify-between items-center bg-white p-4 rounded-lg shadow">
+        <a href="admin.html" class="text-blue-700 text-sm font-semibold hover:underline">← กลับหน้าจัดการ</a>
+        <button onclick="window.print()" class="bg-blue-800 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-900 shadow">
+            🖨️ สั่งพิมพ์เอกสาร / บันทึก PDF
+        </button>
+    </div>
+
+    <!-- กระดาษ A4 ใบอนุญาต -->
+    <div class="print-area max-w-4xl mx-auto bg-white p-12 rounded-lg shadow-xl border border-gray-300 text-gray-900 relative min-h-[1000px]">
+        
+        <!-- ตราครุฑ -->
+        <div class="text-center mb-4">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c9/Garuda_Emblem_of_Thailand.svg" alt="ตราครุฑ" class="h-24 mx-auto mb-2">
+            <h1 class="text-2xl font-bold tracking-wide">ใบอนุญาตประกอบกิจการ</h1>
+            <p class="text-base text-gray-700">ตามพระราชบัญญัติการสาธารณสุข พ.ศ. 2535</p>
+            <p class="text-lg font-bold mt-1">องค์การบริหารส่วนตำบลเชิงทะเล อำเภอถลาง จังหวัดภูเก็ต</p>
+        </div>
+
+        <!-- เลขที่ใบอนุญาต -->
+        <div class="flex justify-end mb-6 text-sm">
+            <p><b>เลขที่ใบอนุญาต:</b> <span id="licenseNo" class="border-b border-dotted border-gray-800 px-2 font-bold">กำลังโหลด...</span></p>
+        </div>
+
+        <!-- เนื้อหาใบอนุญาต -->
+        <div class="space-y-4 text-base leading-relaxed px-4">
+            <p class="indent-12">
+                ใบอนุญาตฉบับนี้ให้ไว้แก่ <b id="applicantName" class="border-b border-dotted border-gray-800 px-2">........................................</b> 
+                เลขประจำตัวประชาชน <span id="idCard" class="border-b border-dotted border-gray-800 px-2">....................</span>
+            </p>
+            <p>
+                อยู่บ้านเลขที่ / ที่ตั้งติดต่อ <span id="applicantAddress" class="border-b border-dotted border-gray-800 px-2">...................................................................................................................................</span>
+            </p>
+            <p class="indent-12">
+                เพื่ออนุญาตให้ประกอบกิจการประเภท <b id="businessType" class="border-b border-dotted border-gray-800 px-2">...................................................................................................</b>
+            </p>
+            <p>
+                ณ สถานประกอบการชื่อ <b id="businessName" class="border-b border-dotted border-gray-800 px-2">...............................................................................................................................</b>
+            </p>
+            <p>
+                ตั้งอยู่ ณ <span id="locationAddress" class="border-b border-dotted border-gray-800 px-2">.............................................................................................................................................................</span>
+            </p>
+            <p class="indent-12">
+                โดยต้องปฏิบัติตามเงื่อนไข และกฎกระทรวง ข้อกำหนดของท้องถิ่นอย่างเคร่งครัด
+            </p>
+        </div>
+
+        <!-- วันที่ออกและหมดอายุ -->
+        <div class="mt-8 px-4 text-sm space-y-1">
+            <p><b>ให้ไว้ ณ วันที่:</b> <span id="issueDate">................................................</span></p>
+            <p><b>ใบอนุญาตนี้สิ้นอายุ ณ วันที่:</b> <span id="expireDate" class="font-bold">31 ธันวาคม พ.ศ. 2569</span></p>
+        </div>
+
+        <!-- ลายเซ็นผู้อนุมัติ -->
+        <div class="mt-16 float-right text-center w-72 text-sm space-y-1">
+            <p>(ลงชื่อ)...........................................................</p>
+            <p class="font-bold pt-1">(นายมาโนช พันธ์ฉลาด)</p>
+            <p>นายกองค์การบริหารส่วนตำบลเชิงทะเล</p>
+        </div>
+
+        <div class="clear-both"></div>
+
+        <!-- QR Code สำหรับสแกนตรวจสอบความถูกต้อง (มุมล่างซ้าย) -->
+        <div class="absolute bottom-8 left-12 flex items-center gap-3 text-xs text-gray-500">
+            <div id="qrcode" class="w-16 h-16 bg-gray-100 border flex items-center justify-center text-[10px] text-center">QR Code Verification</div>
+            <div>
+                <p class="font-bold text-gray-700">เอกสารนี้เป็นเอกสารอนุมัติดิจิทัล</p>
+                <p>ตรวจสอบความถูกต้องได้จากระบบ อบต.เชิงทะเล</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        window.onload = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+
+            if (!id) {
+                alert('ไม่พบรหัสคำขอ');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/get-detail?id=${id}`);
+                const data = await res.json();
+
+                if (data.success && data.detail) {
+                    const d = data.detail;
+                    document.getElementById('licenseNo').innerText = d.old_license_no || `สส. ${d.app_no.replace('REQ-', '')}`;
+                    document.getElementById('applicantName').innerText = d.applicant_name;
+                    document.getElementById('idCard').innerText = d.id_card;
+                    document.getElementById('applicantAddress').innerText = d.location_address;
+                    document.getElementById('businessType').innerText = d.business_type;
+                    document.getElementById('businessName').innerText = d.business_name;
+                    document.getElementById('locationAddress').innerText = d.location_address;
+
+                    // แปลงวันที่อนุมัติ
+                    const dateObj = new Date(d.updated_at || d.created_at);
+                    const thaiMonths = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+                    document.getElementById('issueDate').innerText = `${dateObj.getDate()} ${thaiMonths[dateObj.getMonth()]} พ.ศ. ${dateObj.getFullYear() + 543}`;
+                } else {
+                    alert('ไม่พบข้อมูลใบอนุญาตนี้');
+                }
+            } catch (err) {
+                alert('ไม่สามารถดึงข้อมูลเอกสารได้');
+            }
+        };
+    </script>
+</body>
+</html>

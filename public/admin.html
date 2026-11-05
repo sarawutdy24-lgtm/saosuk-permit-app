@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบหลังบ้านเจ้าหน้าที่ - กองสาธารณสุข อบต.เชิงทะเล</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 สำหรับแจ้งเตือนและกล่องโต้ตอบ -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-slate-100 font-sans min-h-screen">
+
+    <!-- Header / Navbar ฝั่งเจ้าหน้าที่ -->
+    <header class="bg-slate-900 text-white p-4 shadow-md sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+            <div>
+                <h1 class="text-xl font-bold">ระบบจัดการคำขอใบอนุญาต (สำหรับเจ้าหน้าที่)</h1>
+                <p class="text-xs text-slate-400">กองสาธารณสุขและสิ่งแวดล้อม องค์การบริหารส่วนตำบลเชิงทะเล</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="loadApplications()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition flex items-center gap-1">
+                    🔄 รีเฟรชข้อมูล
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto my-6 p-4 md:p-6 bg-white rounded-xl shadow-sm border border-slate-200">
+        
+        <!-- แถบสรุปจำนวนคำขอ และตัวกรองสถานะ -->
+        <div class="mb-6 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+                <h2 class="text-lg font-bold text-slate-800">รายการคำขอใบอนุญาตทั้งหมด</h2>
+                <!-- ช่องค้นหาด่วน -->
+                <input type="text" id="searchTable" onkeyup="searchInTable()" placeholder="ค้นหาชื่อผู้ยื่น, ร้านค้า, หรือเลขคำขอ..." class="p-2 border rounded-lg text-sm w-full md:w-64">
+            </div>
+
+            <!-- ปุ่มกรองสถานะ -->
+            <div class="flex flex-wrap gap-2">
+                <button onclick="filterStatus('ALL')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm bg-slate-800 text-white font-medium hover:bg-slate-700">
+                    ทั้งหมด (<span id="count-ALL">0</span>)
+                </button>
+                <button onclick="filterStatus('PENDING')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm bg-amber-100 text-amber-900 font-medium hover:bg-amber-200">
+                    รอตรวจสอบ (<span id="count-PENDING">0</span>)
+                </button>
+                <button onclick="filterStatus('ACTION_REQUIRED')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm bg-orange-100 text-orange-900 font-medium hover:bg-orange-200">
+                    รอแก้ไขเอกสาร (<span id="count-ACTION_REQUIRED">0</span>)
+                </button>
+                <button onclick="filterStatus('APPROVED')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm bg-emerald-100 text-emerald-900 font-medium hover:bg-emerald-200">
+                    อนุมัติแล้ว (<span id="count-APPROVED">0</span>)
+                </button>
+                <button onclick="filterStatus('REJECTED')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm bg-rose-100 text-rose-900 font-medium hover:bg-rose-200">
+                    ไม่อนุมัติ (<span id="count-REJECTED">0</span>)
+                </button>
+            </div>
+        </div>
+
+        <!-- ตารางแสดงรายการคำขอ -->
+        <div class="overflow-x-auto rounded-lg border border-slate-200">
+            <table class="w-full text-sm text-left text-slate-600 border-collapse">
+                <thead class="text-xs text-slate-700 uppercase bg-slate-100 border-b">
+                    <tr>
+                        <th class="p-3">เลขคำขอ / ประเภท</th>
+                        <th class="p-3">ชื่อผู้ยื่น / สถานประกอบการ</th>
+                        <th class="p-3">ประเภทกิจการ</th>
+                        <th class="p-3">ข้อมูลติดต่อ</th>
+                        <th class="p-3 text-center">เอกสารแนบ</th>
+                        <th class="p-3 text-center">สถานะ</th>
+                        <th class="p-3 text-center min-w-[120px]">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="appTableBody">
+                    <tr>
+                        <td colspan="7" class="text-center py-8 text-slate-400">
+                            กำลังโหลดข้อมูลจากฐานข้อมูล...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- JavaScript สำหรับระบบ Admin -->
+    <script>
+        let allData = [];
+        let currentFilter = 'ALL';
+
+        // โหลดข้อมูลอัตโนมัติเมื่อเปิดหน้า
+        window.onload = loadApplications;
+
+        // ดึงข้อมูลคำขอทั้งหมดจาก API
+        async function loadApplications() {
+            const tbody = document.getElementById('appTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">กำลังดึงข้อมูลล่าสุด...</td></tr>';
+
+            try {
+                const res = await fetch('/api/admin-list');
+                const data = await res.json();
+
+                if (data.success) {
+                    allData = data.results || [];
+                    updateCounts();
+                    filterStatus(currentFilter);
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-rose-500">เกิดข้อผิดพลาด: ${data.message}</td></tr>`;
+                }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-rose-500">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</td></tr>';
+            }
+        }
+
+        // แสดงผลตาราง
+        function renderTable(list) {
+            const tbody = document.getElementById('appTableBody');
+
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-400">ไม่พบรายการคำขอในหมวดหมู่นี้</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = list.map(item => `
+                <tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-3 align-top">
+                        <span class="font-bold text-slate-800">${item.app_no}</span><br>
+                        <span class="text-xs px-2 py-0.5 rounded ${item.app_type === 'NEW' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}">
+                            ${item.app_type === 'NEW' ? 'ขอใหม่' : 'ต่ออายุ (' + (item.old_license_no || '-') + ')'}
+                        </span>
+                        <div class="text-[11px] text-slate-400 mt-1">${new Date(item.created_at).toLocaleDateString('th-TH')}</div>
+                    </td>
+                    <td class="p-3 align-top">
+                        <b class="text-slate-800">${item.applicant_name}</b><br>
+                        <span class="text-xs text-slate-600">ร้าน: ${item.business_name}</span><br>
+                        <span class="text-xs text-slate-400">${item.location_address}</span>
+                    </td>
+                    <td class="p-3 align-top text-xs text-slate-700">
+                        ${item.business_type}
+                    </td>
+                    <td class="p-3 align-top text-xs">
+                        <b>โทร:</b> ${item.phone}<br>
+                        <b>เลขบัตร:</b> ${item.id_card}<br>
+                        ${item.email ? `<b>อีเมล:</b> ${item.email}` : ''}
+                    </td>
+                    <td class="p-3 align-top text-center">
+                        ${item.doc_url ? `
+                            <a href="${item.doc_url}" target="_blank" class="inline-block bg-slate-100 hover:bg-slate-200 text-blue-700 border border-blue-300 text-xs px-2.5 py-1 rounded font-medium transition">
+                                📁 เปิดเอกสาร
+                            </a>
+                        ` : '<span class="text-slate-400 text-xs">ไม่มีลิงก์</span>'}
+                    </td>
+                    <td class="p-3 align-top text-center">
+                        ${getStatusBadge(item.status)}
+                        ${item.officer_remark ? `<div class="text-[11px] text-amber-800 bg-amber-50 p-1 mt-1 rounded border border-amber-200 text-left"><b>หมายเหตุ:</b> ${item.officer_remark}</div>` : ''}
+                    </td>
+                    <td class="p-3 align-top text-center space-y-1">
+                        <button onclick="openManageModal(${item.id}, '${item.status}', '${item.officer_remark || ''}')" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 py-1.5 rounded font-medium transition shadow-sm">
+                            ⚙️ จัดการ
+                        </button>
+                        ${item.status === 'APPROVED' ? `
+                            <a href="print-permit.html?id=${item.id}" target="_blank" class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded font-bold transition shadow-sm">
+                                🖨️ พิมพ์ใบอนุญาต
+                            </a>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // กรองคำขอตามสถานะ
+        function filterStatus(status) {
+            currentFilter = status;
+            if (status === 'ALL') {
+                renderTable(allData);
+            } else {
+                renderTable(allData.filter(x => x.status === status));
+            }
+        }
+
+        // ระบบค้นหาข้อความในตาราง
+        function searchInTable() {
+            const kw = document.getElementById('searchTable').value.toLowerCase();
+            const filtered = allData.filter(item => 
+                (item.app_no && item.app_no.toLowerCase().includes(kw)) ||
+                (item.applicant_name && item.applicant_name.toLowerCase().includes(kw)) ||
+                (item.business_name && item.business_name.toLowerCase().includes(kw)) ||
+                (item.phone && item.phone.includes(kw))
+            );
+            renderTable(filtered);
+        }
+
+        // อัปเดตตัวเลขจำนวนรวมบนปุ่ม
+        function updateCounts() {
+            document.getElementById('count-ALL').innerText = allData.length;
+            document.getElementById('count-PENDING').innerText = allData.filter(x => x.status === 'PENDING').length;
+            document.getElementById('count-ACTION_REQUIRED').innerText = allData.filter(x => x.status === 'ACTION_REQUIRED').length;
+            document.getElementById('count-APPROVED').innerText = allData.filter(x => x.status === 'APPROVED').length;
+            document.getElementById('count-REJECTED').innerText = allData.filter(x => x.status === 'REJECTED').length;
+        }
+
+        // สร้างป้าย Badge แสดงสถานะ
+        function getStatusBadge(status) {
+            const badges = {
+                'PENDING': '<span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">รอตรวจสอบ</span>',
+                'APPROVED': '<span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-bold">อนุมัติแล้ว</span>',
+                'REJECTED': '<span class="bg-rose-100 text-rose-800 text-xs px-2.5 py-1 rounded-full font-bold">ไม่อนุมัติ</span>',
+                'ACTION_REQUIRED': '<span class="bg-orange-100 text-orange-800 text-xs px-2.5 py-1 rounded-full font-bold">รอแก้ไขเอกสาร</span>'
+            };
+            return badges[status] || status;
+        }
+
+        // กล่องโต้ตอบอัปเดตสถานะ (Modal)
+        async function openManageModal(id, currentStatus, currentRemark) {
+            const { value: formValues } = await Swal.fire({
+                title: 'อัปเดตสถานะคำขอ',
+                html: `
+                    <div class="text-left space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">สถานะการดำเนินการ</label>
+                            <select id="swal-status" class="w-full p-2 border rounded-lg text-sm bg-white">
+                                <option value="PENDING" ${currentStatus === 'PENDING' ? 'selected' : ''}>รอตรวจสอบ (Pending)</option>
+                                <option value="ACTION_REQUIRED" ${currentStatus === 'ACTION_REQUIRED' ? 'selected' : ''}>ให้แก้ไขเอกสารเพิ่มเติม (Action Required)</option>
+                                <option value="APPROVED" ${currentStatus === 'APPROVED' ? 'selected' : ''}>อนุมัติเรียบร้อย (Approved)</option>
+                                <option value="REJECTED" ${currentStatus === 'REJECTED' ? 'selected' : ''}>ไม่อนุมัติ (Rejected)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">หมายเหตุ / แจ้งสิ่งที่ต้องแก้ไข</label>
+                            <textarea id="swal-remark" rows="3" class="w-full p-2 border rounded-lg text-sm" placeholder="ระบุเหตุผลหรือรายละเอียดเพิ่มเติมที่ต้องการแจ้งประชาชน...">${currentRemark}</textarea>
+                        </div>
+                    </div>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'บันทึกข้อมูล',
+                cancelButtonText: 'ยกเลิก',
+                customClass: {
+                    confirmButton: 'bg-blue-700 text-white px-4 py-2 rounded-lg font-bold',
+                    cancelButton: 'bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-bold'
+                },
+                preConfirm: () => {
+                    return {
+                        status: document.getElementById('swal-status').value,
+                        officer_remark: document.getElementById('swal-remark').value
+                    }
+                }
+            });
+
+            if (formValues) {
+                try {
+                    const res = await fetch('/api/update-status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id, ...formValues })
+                    });
+                    const result = await res.json();
+                    
+                    if (result.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'บันทึกสำเร็จ',
+                            text: 'อัปเดตสถานะคำขอเรียบร้อยแล้ว',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                        loadApplications(); // โหลดตารางใหม่
+                    } else {
+                        Swal.fire('เกิดข้อผิดพลาด', result.message, 'error');
+                    }
+                } catch (err) {
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้', 'error');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

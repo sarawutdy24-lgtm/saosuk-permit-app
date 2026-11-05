@@ -1,0 +1,7 @@
+name = "saosuk-permit-app"
+pages_build_output_dir = "./public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "saosuk-permit-db"
+database_id = "ae369d11-cf9a-4899-8f82-bf6086a2c007"
