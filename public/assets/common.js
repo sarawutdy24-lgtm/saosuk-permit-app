@@ -153,9 +153,12 @@
         try {
           const file = await shrinkImage(orig);
           if (file.size > 5 * 1048576) throw new Error(`"${orig.name}" ใหญ่เกิน 5 MB`);
-          const fd = new FormData(); fd.append('file', file, file.name);
-          const r = await api('/api/upload', { method: 'POST', body: fd });
-          items.push({ key: r.key, name: orig.name, size: r.size });
+          const r = await api('/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/octet-stream', 'X-File-Name': encodeURIComponent((orig.name || 'file').slice(0, 80)) },
+            body: file,
+          });
+          items.push({ key: r.key, name: orig.name || 'เอกสารแนบ', size: r.size });
         } catch (e) { toast(e.message, 'err'); }
         pending--; draw(); emit();
       }
