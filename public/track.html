@@ -5,28 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ติดตามสถานะคำขอ - อบต.เชิงทะเล</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-100 font-sans min-h-screen">
-    <nav class="bg-blue-900 text-white shadow-lg p-4">
-        <div class="max-w-5xl mx-auto flex justify-between items-center">
-            <h1 class="font-bold text-lg md:text-xl">อบต.เชิงทะเล | ติดตามสถานะคำขอ</h1>
-            <a href="index.html" class="bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-lg text-sm transition">ยื่นคำขอใหม่</a>
+<body class="bg-slate-100 font-sans min-h-screen text-slate-800">
+    <nav class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
+            <h1 class="font-bold text-base md:text-lg">อบต.เชิงทะเล | ติดตามสถานะคำขอ</h1>
+            <a href="index.html" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition shadow flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> ยื่นคำขอใหม่
+            </a>
         </div>
     </nav>
 
-    <div class="max-w-2xl mx-auto my-8 p-6 bg-white rounded-xl shadow-md">
-        <h2 class="text-xl font-bold text-slate-800 mb-4">ค้นหาและตรวจสอบสถานะคำขอ</h2>
-        
-        <div class="flex gap-2 mb-6">
-            <input type="text" id="searchInput" placeholder="พิมพ์เลขที่คำขอ (เช่น REQ-2569-1001) หรือ เบอร์โทรศัพท์" class="flex-1 p-2.5 border rounded-lg">
-            <button onclick="searchStatus()" class="bg-blue-700 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-800">ค้นหา</button>
-        </div>
+    <main class="max-w-2xl mx-auto my-8 px-4">
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-slate-200">
+            <div class="text-center mb-6">
+                <h2 class="text-xl font-bold text-slate-800">ตรวจสอบสถานะใบอนุญาต</h2>
+                <p class="text-xs md:text-sm text-slate-500 mt-1">กรอกเลขที่คำขอ (เช่น REQ-2569-xxxx) หรือเบอร์โทรศัพท์มือถือ</p>
+            </div>
+            
+            <div class="flex gap-2 mb-6">
+                <input type="text" id="searchInput" placeholder="พิมพ์เลขที่คำขอ หรือ เบอร์โทรศัพท์..." class="flex-1 p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <button onclick="searchStatus()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition shadow flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-search"></i> ค้นหา
+                </button>
+            </div>
 
-        <div id="resultBox" class="hidden space-y-4"></div>
-    </div>
+            <div id="resultBox" class="space-y-4"></div>
+        </div>
+    </main>
 
     <script>
-        // โหลดเลขที่คำขออัตโนมัติหากมาจาก URL query string
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
             const appNo = urlParams.get('app_no');
@@ -41,8 +50,7 @@
             if (!keyword) return alert('กรุณากรอกข้อมูลค้นหา');
 
             const resultBox = document.getElementById('resultBox');
-            resultBox.innerHTML = '<p class="text-center text-gray-500">กำลังค้นหาข้อมูล...</p>';
-            resultBox.classList.remove('hidden');
+            resultBox.innerHTML = '<div class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin text-2xl"></i><p class="mt-2 text-sm">กำลังค้นหาข้อมูล...</p></div>';
 
             try {
                 const res = await fetch(`/api/tracking?q=${encodeURIComponent(keyword)}`);
@@ -50,36 +58,49 @@
 
                 if (data.success && data.results.length > 0) {
                     resultBox.innerHTML = data.results.map(item => `
-                        <div class="border rounded-lg p-4 bg-slate-50 space-y-2">
-                            <div class="flex justify-between items-start">
+                        <div class="border border-slate-200 rounded-xl p-5 bg-slate-50/50 space-y-3 shadow-sm hover:shadow transition">
+                            <div class="flex justify-between items-start border-b pb-3">
                                 <div>
-                                    <span class="text-xs font-semibold px-2.5 py-1 rounded ${item.app_type === 'NEW' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}">
-                                        ${item.app_type === 'NEW' ? 'ขอใหม่' : 'ต่ออายุ'}
+                                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-md ${item.app_type === 'NEW' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}">
+                                        ${item.app_type === 'NEW' ? 'ขอใบอนุญาตใหม่' : 'ต่ออายุใบอนุญาต'}
                                     </span>
-                                    <h3 class="font-bold text-lg text-slate-800 mt-1">${item.app_no}</h3>
+                                    <h3 class="font-bold text-lg text-slate-800 font-mono mt-1">${item.app_no}</h3>
                                 </div>
                                 <div>${getStatusBadge(item.status)}</div>
                             </div>
-                            <p class="text-sm text-gray-700"><b>ชื่อผู้ยื่น:</b> ${item.applicant_name}</p>
-                            <p class="text-sm text-gray-700"><b>ร้านค้า:</b> ${item.business_name} (${item.business_type})</p>
-                            <p class="text-sm text-gray-500"><b>วันที่ยื่น:</b> ${new Date(item.created_at).toLocaleString('th-TH')}</p>
-                            ${item.officer_remark ? `<div class="bg-amber-50 p-2.5 rounded border border-amber-200 text-xs text-amber-900"><b>หมายเหตุจากเจ้าหน้าที่:</b> ${item.officer_remark}</div>` : ''}
+                            <div class="text-sm space-y-1 text-slate-700">
+                                <p><b class="text-slate-500">ผู้ยื่น:</b> ${item.applicant_name}</p>
+                                <p><b class="text-slate-500">สถานประกอบการ:</b> ${item.business_name} (${item.business_type})</p>
+                                <p><b class="text-slate-500">วันที่ยื่น:</b> ${new Date(item.created_at).toLocaleString('th-TH')}</p>
+                            </div>
+                            ${item.officer_remark ? `
+                                <div class="bg-amber-50 p-3 rounded-lg border border-amber-200 text-xs text-amber-900">
+                                    <b class="flex items-center gap-1 font-bold mb-0.5"><i class="fa-solid fa-triangle-exclamation"></i> หมายเหตุจากเจ้าหน้าที่:</b> ${item.officer_remark}
+                                </div>
+                            ` : ''}
+                            ${item.status === 'APPROVED' ? `
+                                <div class="pt-2">
+                                    <a href="print-permit.html?id=${item.id}" target="_blank" class="w-full block text-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-lg shadow transition">
+                                        <i class="fa-solid fa-print"></i> พิมพ์ / ดาวน์โหลดใบอนุญาตดิจิทัล
+                                    </a>
+                                </div>
+                            ` : ''}
                         </div>
                     `).join('');
                 } else {
-                    resultBox.innerHTML = '<p class="text-center text-red-500 py-4">ไม่พบข้อมูลคำขอในระบบ</p>';
+                    resultBox.innerHTML = '<div class="text-center py-8 text-rose-500 text-sm bg-rose-50 rounded-xl border border-rose-100">ไม่พบข้อมูลคำขอในระบบ กรุณาตรวจสอบหมายเลขคำขอหรือเบอร์โทรศัพท์อีกครั้ง</div>';
                 }
             } catch (err) {
-                resultBox.innerHTML = '<p class="text-center text-red-500 py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>';
+                resultBox.innerHTML = '<div class="text-center py-8 text-rose-500 text-sm">เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์</div>';
             }
         }
 
         function getStatusBadge(status) {
             const badges = {
-                'PENDING': '<span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">รอตรวจสอบ</span>',
-                'APPROVED': '<span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">อนุมัติแล้ว</span>',
-                'REJECTED': '<span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full">ไม่อนุมัติ</span>',
-                'ACTION_REQUIRED': '<span class="bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1 rounded-full">ต้องแก้ไขเอกสาร</span>'
+                'PENDING': '<span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full inline-flex items-center gap-1"><i class="fa-solid fa-clock"></i> รอตรวจสอบ</span>',
+                'APPROVED': '<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full inline-flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> อนุมัติแล้ว</span>',
+                'REJECTED': '<span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1 rounded-full inline-flex items-center gap-1"><i class="fa-solid fa-circle-xmark"></i> ไม่อนุมัติ</span>',
+                'ACTION_REQUIRED': '<span class="bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1 rounded-full inline-flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> ต้องแก้ไขเอกสาร</span>'
             };
             return badges[status] || status;
         }
