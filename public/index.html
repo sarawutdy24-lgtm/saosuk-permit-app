@@ -13,21 +13,27 @@
 </head>
 <body class="bg-slate-100 font-sans min-h-screen text-slate-800">
 
-    <!-- Navbar -->
+    <!-- Navbar พร้อมปุ่มเมนูเรียงสวยงาม -->
     <nav class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row justify-between items-center gap-3">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center font-bold text-lg">
-                    <i class="fa-solid fa-building-columns text-blue-300"></i>
+                <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center font-bold text-lg text-blue-300">
+                    <i class="fa-solid fa-building-columns"></i>
                 </div>
                 <div>
                     <h1 class="font-bold text-base md:text-lg leading-tight">อบต.เชิงทะเล</h1>
                     <p class="text-xs text-blue-200">ระบบขอใบอนุญาตด้านสาธารณสุข</p>
                 </div>
             </div>
-            <a href="track.html" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition shadow flex items-center gap-2">
-                <i class="fa-solid fa-magnifying-glass"></i> ติดตามสถานะคำขอ
-            </a>
+            <!-- ปุ่มเมนูด้านบนเรียงสวยงาม -->
+            <div class="flex items-center gap-2">
+                <a href="index.html" class="bg-blue-700 hover:bg-blue-600 px-3.5 py-2 rounded-xl text-xs md:text-sm font-semibold transition shadow flex items-center gap-1.5 border border-blue-600">
+                    <i class="fa-solid fa-file-circle-plus"></i> ยื่นคำขอใหม่
+                </a>
+                <a href="track.html" class="bg-white/10 hover:bg-white/20 px-3.5 py-2 rounded-xl text-xs md:text-sm font-semibold transition shadow flex items-center gap-1.5 border border-white/20">
+                    <i class="fa-solid fa-magnifying-glass"></i> ติดตามสถานะ
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -35,7 +41,6 @@
     <main class="max-w-3xl mx-auto my-8 px-4">
         <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
             
-            <!-- Form Header Banner -->
             <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 md:p-8 border-b border-slate-100 text-center">
                 <div class="w-14 h-14 bg-blue-600 text-white rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-md mb-3">
                     <i class="fa-solid fa-file-signature"></i>
@@ -50,14 +55,14 @@
                     <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">ประสงค์จะยื่นคำขอเรื่อง *</label>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <label class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-blue-500 transition shadow-sm">
-                            <input type="radio" name="app_type" value="NEW" checked class="w-4 h-4 text-blue-600 focus:ring-blue-500" onchange="toggleRenewInput()">
+                            <input type="radio" name="app_type" value="NEW" checked class="w-4 h-4 text-blue-600" onchange="toggleRenewInput()">
                             <div>
                                 <span class="font-bold text-slate-800 text-sm block">ขอใบอนุญาตใหม่</span>
                                 <span class="text-xs text-slate-500">สำหรับผู้ประกอบการรายใหม่</span>
                             </div>
                         </label>
                         <label class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-blue-500 transition shadow-sm">
-                            <input type="radio" name="app_type" value="RENEW" class="w-4 h-4 text-blue-600 focus:ring-blue-500" onchange="toggleRenewInput()">
+                            <input type="radio" name="app_type" value="RENEW" class="w-4 h-4 text-blue-600" onchange="toggleRenewInput()">
                             <div>
                                 <span class="font-bold text-slate-800 text-sm block">ต่ออายุใบอนุญาตเดิม</span>
                                 <span class="text-xs text-slate-500">สำหรับกิจการที่มีใบอนุญาตอยู่แล้ว</span>
@@ -66,7 +71,7 @@
                     </div>
                 </div>
 
-                <!-- เลขใบอนุญาตเดิม (ซ่อนไว้ถ้าเป็นขอใหม่) -->
+                <!-- เลขใบอนุญาตเดิม -->
                 <div id="renewBox" class="hidden bg-amber-50 p-4 rounded-xl border border-amber-200">
                     <label class="block text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">เลขที่ใบอนุญาตเดิม *</label>
                     <input type="text" id="old_license_no" placeholder="เช่น สส. 2568/0012" class="w-full mt-1 p-2.5 border border-amber-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-amber-500 outline-none">
@@ -125,11 +130,27 @@
                         <textarea id="location_address" rows="2" required placeholder="ระบุที่ตั้งอย่างละเอียด..." class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                     </div>
 
-                    <!-- ส่วนแนบลิงก์เอกสาร -->
-                    <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                        <label class="block text-xs font-bold text-blue-900 mb-1"><i class="fa-solid fa-link"></i> แนบลิงก์เอกสารประกอบ (Google Drive / OneDrive / รูปถ่าย)</label>
-                        <input type="url" id="doc_url" placeholder="https://drive.google.com/..." class="w-full p-2.5 border border-blue-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
-                        <p class="text-[11px] text-slate-500 mt-1.5">* รวบรวมสำเนาบัตรประชาชน, ทะเบียนบ้าน, แผนผังร้าน หรือใบอนุญาตเดิมไว้ในลิงก์เดียว</p>
+                    <!-- ส่วนอัปโหลดไฟล์เอกสารโดยตรง -->
+                    <div class="bg-blue-50/60 p-5 rounded-2xl border border-blue-200 space-y-4">
+                        <h4 class="text-xs font-bold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-cloud-arrow-up text-blue-600"></i> อัปโหลดเอกสารประกอบการพิจารณา
+                        </h4>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- อัปโหลดสำเนาบัตรประชาชน -->
+                            <div class="bg-white p-3.5 rounded-xl border border-blue-100 shadow-sm">
+                                <label class="block text-xs font-bold text-slate-700 mb-1">1. สำเนาบัตรประจำตัวประชาชน *</label>
+                                <input type="file" id="file_id_card" accept="image/*,application/pdf" required class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                                <p class="text-[10px] text-slate-400 mt-1">รองรับไฟล์รูปภาพ (JPG, PNG) หรือ PDF</p>
+                            </div>
+
+                            <!-- อัปโหลดแผนผัง / เอกสารอื่นๆ -->
+                            <div class="bg-white p-3.5 rounded-xl border border-blue-100 shadow-sm">
+                                <label class="block text-xs font-bold text-slate-700 mb-1">2. แผนผังร้าน / รูปถ่ายสถานประกอบการ *</label>
+                                <input type="file" id="file_shop" accept="image/*,application/pdf" required class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                                <p class="text-[10px] text-slate-400 mt-1">รองรับไฟล์รูปภาพ (JPG, PNG) หรือ PDF</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -146,27 +167,58 @@
             document.getElementById('renewBox').classList.toggle('hidden', !isRenew);
         }
 
+        // แปลงไฟล์เป็น Base64 เพื่อส่งเข้า API และบันทึกลงฐานข้อมูล
+        function convertFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
         document.getElementById('permitForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmit');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังส่งข้อมูล...';
-
-            const appType = document.querySelector('input[name="app_type"]:checked').value;
-            const payload = {
-                app_type: appType,
-                old_license_no: appType === 'RENEW' ? document.getElementById('old_license_no').value : '',
-                applicant_name: document.getElementById('applicant_name').value,
-                id_card: document.getElementById('id_card').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value,
-                business_name: document.getElementById('business_name').value,
-                business_type: document.getElementById('business_type').value,
-                location_address: document.getElementById('location_address').value,
-                doc_url: document.getElementById('doc_url').value
-            };
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังอัปโหลดเอกสารและส่งข้อมูล...';
 
             try {
+                const fileIdCardElem = document.getElementById('file_id_card').files[0];
+                const fileShopElem = document.getElementById('file_shop').files[0];
+
+                let idCardBase64 = '';
+                let shopBase64 = '';
+
+                if (fileIdCardElem) {
+                    idCardBase64 = await convertFileToBase64(fileIdCardElem);
+                }
+                if (fileShopElem) {
+                    shopBase64 = await convertFileToBase64(fileShopElem);
+                }
+
+                // รวมข้อมูลลิงก์ไฟล์เป็น JSON string เก็บใน doc_url
+                const docsPayload = JSON.stringify({
+                    id_card_doc: idCardBase64,
+                    shop_doc: shopBase64,
+                    id_card_name: fileIdCardElem ? fileIdCardElem.name : '',
+                    shop_name: fileShopElem ? fileShopElem.name : ''
+                });
+
+                const appType = document.querySelector('input[name="app_type"]:checked').value;
+                const payload = {
+                    app_type: appType,
+                    old_license_no: appType === 'RENEW' ? document.getElementById('old_license_no').value : '',
+                    applicant_name: document.getElementById('applicant_name').value,
+                    id_card: document.getElementById('id_card').value,
+                    phone: document.getElementById('phone').value,
+                    email: document.getElementById('email').value,
+                    business_name: document.getElementById('business_name').value,
+                    business_type: document.getElementById('business_type').value,
+                    location_address: document.getElementById('location_address').value,
+                    doc_url: docsPayload
+                };
+
                 const res = await fetch('/api/submit', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -188,7 +240,7 @@
                     Swal.fire('เกิดข้อผิดพลาด', data.message, 'error');
                 }
             } catch (err) {
-                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถอัปโหลดไฟล์หรือเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ส่งคำขอใบอนุญาต';
