@@ -50,6 +50,7 @@
 - รองรับมือถือเต็มรูปแบบ, ใบอนุญาตพิมพ์ A4 พร้อมกรอบ
 
 ## ทดสอบในเครื่อง (ไม่บังคับ)
+
 ```
 echo "ADMIN_PASSWORD=ตั้งเอง" > .dev.vars
 npx wrangler pages dev public
