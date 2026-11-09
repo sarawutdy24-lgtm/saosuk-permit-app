@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ติดตามสถานะคำขอ | อบต.เชิงทะเล</title>
+  <meta name="theme-color" content="#062f3f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>ติดตามสถานะคำขอ</h1>
+      <p>ตรวจสอบความคืบหน้าการพิจารณาใบอนุญาตของท่านได้ทันที</p>
+    </div>
+  </section>
+
+  <main class="container" style="max-width:820px;padding-bottom:24px">
+    <div class="card search-card">
+      <form id="searchForm" class="search-row" novalidate>
+        <input class="input" id="q" placeholder="เลขที่คำขอ (REQ-…) / เบอร์โทรศัพท์ / เลขบัตรประชาชน" autocomplete="off" aria-label="คำค้นหา">
+        <button class="btn btn-primary btn-lg" type="submit" id="btnSearch">ค้นหา</button>
+      </form>
+      <p class="hint" style="margin-top:10px">ค้นหาด้วยข้อมูลที่ตรงกันทั้งหมดเท่านั้น เพื่อความปลอดภัยของข้อมูลส่วนบุคคล</p>
+    </div>
+    <div id="results" aria-live="polite"></div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/common.js"></script>
+  <script src="assets/track.js"></script>
+</body>
+</html>

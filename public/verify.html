@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ตรวจสอบใบอนุญาต | อบต.เชิงทะเล</title>
+  <meta name="theme-color" content="#062f3f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>ตรวจสอบใบอนุญาต</h1>
+      <p>ตรวจสอบความถูกต้องของใบอนุญาตประกอบกิจการที่ออกโดย อบต.เชิงทะเล</p>
+    </div>
+  </section>
+
+  <main class="container" style="max-width:720px;padding-bottom:24px">
+    <div class="card search-card">
+      <form id="vForm" class="search-row" novalidate>
+        <input class="input" id="no" placeholder="เลขที่ใบอนุญาต เช่น สส. 2569/0001" autocomplete="off" aria-label="เลขที่ใบอนุญาต">
+        <button class="btn btn-primary btn-lg" type="submit" id="vBtn">ตรวจสอบ</button>
+      </form>
+      <p class="hint" style="margin-top:10px">หรือสแกน QR Code ที่มุมล่างของใบอนุญาตด้วยกล้องโทรศัพท์</p>
+    </div>
+    <div id="out" aria-live="polite"></div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/common.js"></script>
+  <script>
+    (function () {
+      const { icon, esc, $, api, fmtDate } = UI;
+      UI.mountLayout('verify');
+      $('#vBtn').innerHTML = icon('shield', 18) + ' ตรวจสอบ';
+      const out = $('#out');
+
+      async function check(no) {
+        no = no.trim();
+        if (!no) { $('#no').focus(); return; }
+        out.innerHTML = '<div class="card result"><div class="skeleton" style="height:70px;width:70px;border-radius:50%;margin:0 auto 14px"></div><div class="skeleton" style="height:22px;width:50%;margin:0 auto"></div></div>';
+        try {
+          const r = await api('/api/verify?no=' + encodeURIComponent(no));
+          if (!r.found) {
+            out.innerHTML = `<div class="card result verdict bad"><div class="big">${icon('x', 38)}</div><h2>ไม่พบใบอนุญาตนี้ในระบบ</h2><p class="muted" style="margin-top:6px">เลขที่ <b>${esc(no)}</b> ไม่ตรงกับใบอนุญาตที่ออกโดยระบบ กรุณาตรวจสอบเลขที่อีกครั้ง หรือติดต่อเจ้าหน้าที่</p></div>`;
+            return;
+          }
+          const l = r.license, ok = r.valid;
+          out.innerHTML = `
+            <div class="card result verdict ${ok ? 'ok' : 'warn'}">
+              <div class="big">${icon(ok ? 'shield' : 'clock', 38)}</div>
+              <h2>${ok ? 'ใบอนุญาตถูกต้อง และยังมีผลใช้ได้' : 'ใบอนุญาตนี้หมดอายุแล้ว'}</h2>
+              <div class="lic">${esc(l.license_no)}</div>
+              <dl class="kv">
+                <dt>สถานประกอบการ</dt><dd>${esc(l.business_name)}</dd>
+                <dt>ประเภทกิจการ</dt><dd>${esc(l.business_type)}</dd>
+                <dt>ที่ตั้ง</dt><dd>${esc(l.location_address)}</dd>
+                <dt>ผู้ได้รับใบอนุญาต</dt><dd>${esc(l.applicant_name)}</dd>
+                <dt>วันที่ออก</dt><dd>${fmtDate(l.approved_at)}</dd>
+                <dt>วันหมดอายุ</dt><dd>${l.expires_at ? fmtDate(l.expires_at) : '-'}</dd>
+              </dl>
+            </div>`;
+          history.replaceState(null, '', '?no=' + encodeURIComponent(l.license_no));
+        } catch (e) {
+          out.innerHTML = `<div class="card result"><div class="callout bad" style="margin:0">${icon('alert', 20)}<div>${esc(e.message)}</div></div></div>`;
+        }
+      }
+      $('#vForm').addEventListener('submit', (e) => { e.preventDefault(); check($('#no').value); });
+      const pre = new URLSearchParams(location.search).get('no');
+      if (pre) { $('#no').value = pre; check(pre); }
+    })();
+  </script>
+</body>
+</html>

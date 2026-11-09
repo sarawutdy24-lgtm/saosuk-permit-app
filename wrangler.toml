@@ -1,0 +1,15 @@
+name = "saosuk-permit-app"
+pages_build_output_dir = "./public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "saosuk-permit-db"
+database_id = "ae369d11-cf9a-4899-8f82-bf6086a2c007"
+
+# --- (ทางเลือก) ย้ายที่เก็บไฟล์เอกสารไป R2 เมื่อมีไฟล์จำนวนมาก ---
+# ตอนนี้ระบบอัปโหลดไฟล์ทำงานได้เลยด้วย D1 ไม่ต้องเปิดส่วนนี้
+# 1) สร้าง R2 bucket ชื่อ saosuk-permit-docs ใน Cloudflare Dashboard (R2 > Create bucket)
+# 2) ลบเครื่องหมาย # หน้า 3 บรรทัดด้านล่างนี้ แล้ว commit
+# [[r2_buckets]]
+# binding = "DOCS"
+# bucket_name = "saosuk-permit-docs"

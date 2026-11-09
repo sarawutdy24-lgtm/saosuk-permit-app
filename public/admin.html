@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>ระบบจัดการคำขอ (เจ้าหน้าที่) | อบต.เชิงทะเล</title>
+  <meta name="theme-color" content="#062f3f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body class="admin">
+  <header class="admin-top">
+    <div class="container wide bar">
+      <a class="brand" href="admin.html" id="adminBrand"></a>
+      <div class="actions hidden" id="topActions">
+        <span class="who" id="updatedAt"></span>
+        <button class="btn btn-light btn-sm" id="btnRefresh" type="button"></button>
+        <button class="btn btn-light btn-sm" id="btnLogout" type="button"></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- LOGIN -->
+  <div class="login-wrap hidden" id="loginView">
+    <form class="card login-card" id="loginForm">
+      <div class="lock" id="lockIco"></div>
+      <h1>เข้าสู่ระบบเจ้าหน้าที่</h1>
+      <p class="muted small" style="margin-bottom:20px">สำหรับเจ้าหน้าที่ผู้ได้รับมอบหมายเท่านั้น</p>
+      <div class="field">
+        <label for="pw">รหัสผ่าน</label>
+        <input class="input" type="password" id="pw" autocomplete="current-password" required>
+        <div class="err" id="pwErr"></div>
+      </div>
+      <div class="notice warn hidden" id="notConfigured"></div>
+      <button class="btn btn-primary btn-block btn-lg" type="submit" id="btnLogin">เข้าสู่ระบบ</button>
+      <p class="center small" style="margin-top:16px"><a href="index.html">← กลับหน้าหลัก</a></p>
+    </form>
+  </div>
+
+  <!-- DASHBOARD -->
+  <main class="container wide hidden" id="dash" style="padding-bottom:40px">
+    <div class="stats" id="stats"></div>
+
+    <div class="toolbar">
+      <div class="search"><span id="searchIco"></span><input class="input" id="search" placeholder="ค้นหา ชื่อ / ร้าน / เลขคำขอ / เบอร์โทร  ( กด / )" autocomplete="off"></div>
+      <select class="select" id="typeFilter" aria-label="ประเภทคำขอ">
+        <option value="">ทุกประเภทคำขอ</option><option value="NEW">ขอใหม่</option><option value="RENEW">ต่ออายุ</option>
+      </select>
+      <select class="select" id="sortSel" aria-label="เรียงลำดับ">
+        <option value="new">ใหม่สุดก่อน</option><option value="old">เก่าสุดก่อน (รอนานสุด)</option>
+      </select>
+      <span class="spacer"></span>
+      <span id="expBtnWrap"></span>
+      <button class="btn btn-ghost" id="btnCsv" type="button"></button>
+    </div>
+
+    <div class="panel">
+      <table class="tbl">
+        <thead><tr><th>เลขคำขอ</th><th>ผู้ยื่น / สถานประกอบการ</th><th>ประเภทกิจการ</th><th>ติดต่อ</th><th>สถานะ</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="pager" id="pager"></div>
+    </div>
+  </main>
+
+  <!-- DRAWER -->
+  <div id="drawerRoot"></div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/common.js"></script>
+  <script src="assets/admin.js"></script>
+</body>
+</html>
