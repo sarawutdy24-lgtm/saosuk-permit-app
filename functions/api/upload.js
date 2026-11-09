@@ -15,7 +15,6 @@ export async function onRequestGet() {
 
 export async function onRequestPost({ request, env }) {
   try {
-    if (!(request.headers.get('content-type') || '').includes('multipart/form-data')) return fail('รูปแบบข้อมูลไม่ถูกต้อง');
     if (Number(request.headers.get('content-length') || 0) > MAX_FILE_BYTES + 300_000) return fail('ไฟล์ใหญ่เกิน 5 MB', 413);
 
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
@@ -26,23 +25,33 @@ export async function onRequestPost({ request, env }) {
       if (n >= UPLOADS_PER_HOUR) return fail('อัปโหลดบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่', 429);
     }
 
-    const file = (await request.formData()).get('file');
-    if (!file || typeof file === 'string') return fail('ไม่พบไฟล์');
-    if (file.size === 0) return fail('ไฟล์ว่างเปล่า');
-    if (file.size > MAX_FILE_BYTES) return fail('ไฟล์ใหญ่เกิน 5 MB', 413);
+    // รับได้ 2 แบบ: (1) ส่งไฟล์ตรง ๆ เป็น body + header X-File-Name (หน้าเว็บใช้แบบนี้)
+    //               (2) ฟอร์ม multipart (ไว้ใช้กับเครื่องมืออื่น)
+    let buf, rawName = '';
+    const ct = request.headers.get('content-type') || '';
+    if (ct.includes('multipart/form-data')) {
+      const file = (await request.formData()).get('file');
+      if (!file || typeof file === 'string' || typeof file.arrayBuffer !== 'function') return fail('ไม่พบไฟล์');
+      buf = await file.arrayBuffer();
+      rawName = file.name || '';
+    } else {
+      buf = await request.arrayBuffer();
+      try { rawName = decodeURIComponent(request.headers.get('X-File-Name') || ''); } catch { rawName = ''; }
+    }
+    if (!buf.byteLength) return fail('ไฟล์ว่างเปล่า');
+    if (buf.byteLength > MAX_FILE_BYTES) return fail('ไฟล์ใหญ่เกิน 5 MB', 413);
 
-    const buf = await file.arrayBuffer();
     const kind = sniff(new Uint8Array(buf.slice(0, 8)));
     if (!kind) return fail('รองรับเฉพาะไฟล์ JPG, PNG หรือ PDF');
 
     const key = `${crypto.randomUUID()}.${kind.ext}`;
-    const name = cleanStr(file.name, 80) || key;
+    const name = cleanStr(rawName, 80) || key;
     await putFile(env, key, buf, { name, type: kind.type, ip });
 
     // เก็บกวาดไฟล์ค้างเป็นครั้งคราว (ไม่กระทบผู้ใช้ถ้าพลาด)
     if (Math.random() < 0.05) { try { await cleanupOrphans(env); } catch {} }
 
-    return json({ success: true, key, name, size: file.size, type: kind.type });
+    return json({ success: true, key, name, size: buf.byteLength, type: kind.type });
   } catch (err) {
     return fail('อัปโหลดไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 500);
   }
